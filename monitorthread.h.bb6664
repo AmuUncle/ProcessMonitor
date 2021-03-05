@@ -1,0 +1,40 @@
+﻿
+#ifndef MONITORTHREAD_H
+#define MONITORTHREAD_H
+
+#include <QObject>
+#include <QThread>
+#include <QVector>
+#include "monitorthread.h"
+
+class CMonitorThread : public QThread
+{
+    Q_OBJECT
+
+public:
+    CMonitorThread(QObject *parent = 0);
+    ~CMonitorThread();
+
+public:
+    void SetParam(int nPid);
+    void SetInterval(int nInterval);
+    void StopTask() { m_bQuitQueryTask = true; }
+
+protected:
+    //QThread的虚函数
+    //线程处理函数
+    //不能直接调用，通过start()间接调用
+    void run();
+
+signals:
+    void SignalIsDone();          // 处理完成信号
+
+private:
+    QVector<TNetCreateQueryRecTagTaskParam> m_vecCreateQueryRecTask;
+    QVector<int> m_vecNoPowerId;
+    bool m_bQuitQueryTask;
+    bool m_bMustTimeFrame;
+    int m_nPid;
+    int m_nInterval;
+};
+#endif // MONITORTHREAD_H
