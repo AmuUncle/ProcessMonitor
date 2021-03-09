@@ -11,11 +11,11 @@
 
 #### 软件截图
 
-1.主界面
-![Image text](https://gitee.com/hudejie/ProcessMonitor/blob/master/snap/1.png)  
-
-2.  xxxx
-3.  xxxx
+![Image text](https://imgtu.com/i/63q20U)  
+![Image text](https://imgtu.com/i/63qslq)  
+![Image text](https://imgtu.com/i/63q6XV)  
+![Image text](https://imgtu.com/i/63qgmT)  
+![Image text](https://imgtu.com/i/63qy60)  
 
 #### 参与贡献
 
