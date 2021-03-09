@@ -13,7 +13,7 @@
 
 1.主界面
 ![Image text](https://gitee.com/hudejie/ProcessMonitor/blob/master/snap/1.png)  
-
+![输入图片说明](https://gitee.com/hudejie/ProcessMonitor/blob/master/snap/1.png "在这里输入图片标题")
 2.  xxxx
 3.  xxxx
 
