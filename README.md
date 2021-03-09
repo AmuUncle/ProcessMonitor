@@ -11,7 +11,9 @@
 
 #### 软件截图
 
-1.  xxxx
+1.主界面
+![Image text](https://gitee.com/hudejie/ProcessMonitor/blob/master/snap/1.png)  
+
 2.  xxxx
 3.  xxxx
 
