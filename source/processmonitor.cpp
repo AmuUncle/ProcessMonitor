@@ -26,11 +26,37 @@
 #include <QtWidgets/QLabel>
 #include <QtCore/QTime>
 #include <QtCharts/QBarCategoryAxis>
+#include <QFileDialog>
 #include "iconhelper.h"
+#include "tipwidget.h"
+#include "aboutdlg.h"
+
+#ifdef Q_OS_WIN32
+#include <tlhelp32.h>
+#include <tchar.h>
+#include <ShellAPI.h>
+#endif // Q_OS_WIN32
 
 #if _MSC_VER >= 1600
 #pragma execution_character_set("utf-8")
 #endif
+
+//接收调试信息的函数
+void outputMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    static QMutex mutex;
+    QMutexLocker lock(&mutex);
+
+    QString strCurrentTime = (QDateTime::currentDateTime()).toString("yyyy-MM-dd");
+
+    //将调试信息写入文件
+    QFile file(QString("%1.log").arg(strCurrentTime));
+    file.open(QIODevice::WriteOnly | QIODevice::Append);
+    QTextStream text_stream(&file);
+    text_stream << msg << "\r\n";
+    file.flush();
+    file.close();
+}
 
 ProcessMonitor::ProcessMonitor(QWidget *parent) :
     QWidget(parent),
@@ -74,6 +100,9 @@ ProcessMonitor::ProcessMonitor(QWidget *parent) :
     baseLayout->addWidget(m_chartMem, 1, 0);
     baseLayout->addWidget(m_chartCpu, 1, 1);
 
+    TTipWidget::Instance()->setParent(this);   //设置实例的引用者
+    TTipWidget::Instance()->setVisible(false);
+
     InitCtrl();
     InitSolts();
     UpdateCtrlStatus();
@@ -92,11 +121,18 @@ ProcessMonitor::~ProcessMonitor()
     //等待线程处理完手头工作
     m_thread->wait();
 
+    TTipWidget::ExitInstance();
     SAFE_DELETE(m_thread);
     SAFE_DELETE(m_chartMem);
     SAFE_DELETE(m_chartCpu);
 
     delete ui;
+}
+
+void ProcessMonitor::contextMenuEvent( QContextMenuEvent *event )
+{
+    CreateMemu();
+    event->accept();
 }
 
 void ProcessMonitor::InitCtrl()
@@ -137,11 +173,12 @@ void ProcessMonitor::InitCtrl()
     ui->m_tableLog->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
     ui->m_tableLog->setColumnWidth(0, 160);
-    ui->m_tableLog->setColumnWidth(1, 150);
+    ui->m_tableLog->setColumnWidth(1, 130);
     ui->m_tableLog->setColumnWidth(2, 50);
     ui->m_tableLog->sortItems(0, Qt::DescendingOrder);
 
     ui->m_editPid->setValidator(new QIntValidator(1, 65535));
+    ui->m_editPid->setText(QString("%1").arg(GetCurrentProcessId()));
 }
 
 void ProcessMonitor::InitSolts()
@@ -150,6 +187,7 @@ void ProcessMonitor::InitSolts()
     connect(ui->m_btnMin, SIGNAL(clicked()), this, SLOT(showMinimized()));
     connect(ui->m_btnExit, SIGNAL(clicked()), this, SLOT(close()));
     connect(ui->m_checkChart, SIGNAL(stateChanged(int)), this, SLOT(OnCheckChartStateChanged(int)));
+    connect(ui->m_checkLog, SIGNAL(stateChanged(int)), this, SLOT(OnCheckLogChanged(int)));
     connect(m_thread, SIGNAL(SignalProcState(bool, double, int, QString)), this, SLOT(OnProcState(bool, double, int, QString)));
 }
 
@@ -177,7 +215,7 @@ void ProcessMonitor::InsertChartData(int nIndex, double fUsedMem, int nCpu)
         if (listSeries.count() > 0)
         {
             QLineSeries *pSeries = (QLineSeries *)listSeries.at(0);
-            qDebug() << pSeries->points();
+
             while (pSeries->count() >= 100)
                 pSeries->remove(0);
 
@@ -230,10 +268,44 @@ void ProcessMonitor::InsertChartData(int nIndex, double fUsedMem, int nCpu)
     }
 }
 
+void ProcessMonitor::CreateMemu()
+{
+    // 创建菜单对象
+    QMenu *pMenu = new QMenu(this);
+
+    {
+        QAction *action = new QAction(tr("打开日志目录"), this);
+        action->setData(0);
+        pMenu->addAction(action);
+    }
+
+    if (ui->m_checkChart->isChecked())
+    {
+        QAction *action = new QAction(tr("保存实时曲线图"), this);
+        action->setData(1);
+        pMenu->addAction(action);
+    }
+
+    {
+        QAction *action = new QAction(tr("关于"), this);
+        action->setData(2);
+        pMenu->addAction(action);
+    }
+
+    connect(pMenu, SIGNAL(triggered(QAction *)), this, SLOT(OnMenuTriggered(QAction *)));
+    pMenu->exec(cursor().pos());
+
+    // 释放内存
+    QList<QAction*> listAction = pMenu->actions();
+    foreach (QAction* action, listAction)
+        delete action;
+
+    delete pMenu;
+}
+
 void ProcessMonitor::OnBtnClickedStart()
 {
     int nPid = ui->m_editPid->text().toInt();
-    ui->m_labelTip->setText("");
 
     if (m_bStart)
     {
@@ -244,7 +316,7 @@ void ProcessMonitor::OnBtnClickedStart()
     {
         if (nPid <= 0)
         {
-            ui->m_labelTip->setText(tr("进程不存在!"));
+            TTipWidget::Instance()->SetMesseage(tr("进程不存在!"));  //提示信息
             return;
         }
 
@@ -280,7 +352,7 @@ void ProcessMonitor::OnProcState(bool bSuc, double fUsedMem, int nCpu, QString s
     {
         m_bStart = false;
         m_thread->Pause(true);
-        ui->m_labelTip->setText(tr("进程不存在!"));
+        TTipWidget::Instance()->SetMesseage(tr("进程不存在!"));  //提示信息
         UpdateCtrlStatus();
         return;
     }
@@ -304,8 +376,7 @@ void ProcessMonitor::OnProcState(bool bSuc, double fUsedMem, int nCpu, QString s
 
         InsertChartData(nRowIndex, fUsedMem / 1024, nCpu);
 
-        if (ui->m_checkLog->isChecked())
-            qDebug() << qPrintable(QString("%1").arg(strCurrentTime))
+        qDebug() << qPrintable(QString("%1").arg(strCurrentTime))
                      << qPrintable(strExeName)
                      << qPrintable(ui->m_editPid->text())
                      << qPrintable(QString("%1MB").arg(QString::number(fUsedMem / 1024, 'g', 4)) )
@@ -316,4 +387,53 @@ void ProcessMonitor::OnProcState(bool bSuc, double fUsedMem, int nCpu, QString s
 void ProcessMonitor::OnCheckChartStateChanged(int nState)
 {
     UpdateCtrlStatus();
+}
+
+void ProcessMonitor::OnCheckLogChanged(int nState)
+{
+    if (ui->m_checkLog->isChecked())
+    {
+        qInstallMessageHandler(outputMessage);
+        TTipWidget::Instance()->SetMesseage(tr("日志保存目录:%1").arg(qApp->applicationDirPath()));
+
+
+    }
+    else
+        qInstallMessageHandler(nullptr);
+}
+
+void ProcessMonitor::OnMenuTriggered(QAction *action)
+{
+    int nType = action->data().toInt();
+    switch (nType)
+    {
+    case 0:
+        {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(qApp->applicationDirPath().replace("\\", "/")));
+        }
+        break;
+
+    case 1:
+        {
+            QString fileName = QFileDialog::getSaveFileName(this,
+                                tr("保存文件"),
+                                "",
+                                tr("图片文件(*.jpg)"));
+
+            if (!fileName.isNull())
+            {
+                QPixmap pixChart = ui->m_widgetChart->grab();
+                pixChart.toImage().save(fileName);
+            }
+        }
+        break;
+
+    case 2:
+        {
+            CAboutDlg dlg(this);
+            dlg.EnableMoveWindow(true);
+            dlg.exec();
+        }
+        break;
+    }
 }

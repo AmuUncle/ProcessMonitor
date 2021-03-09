@@ -27,16 +27,22 @@ public:
     ~ProcessMonitor();
 
 private:
+    void contextMenuEvent(QContextMenuEvent *event);
+
+private:
     void InitCtrl();
     void InitSolts();
     void Relayout();
     void UpdateCtrlStatus();
     void InsertChartData(int nIndex, double fUsedMem, int nCpu);
+    void CreateMemu();
 
 private slots:
     void OnBtnClickedStart();
     void OnProcState(bool bSuc, double fUsedMem, int nCpu, QString strExeName);
     void OnCheckChartStateChanged(int nState);
+    void OnCheckLogChanged(int nState);
+    void OnMenuTriggered(QAction *action);
 
 private:
     Ui::ProcessMonitor *ui;

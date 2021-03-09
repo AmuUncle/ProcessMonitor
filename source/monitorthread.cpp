@@ -37,9 +37,6 @@ static double GetUsedMem(int nPid, QString &strExeName)
 
     if (!result.contains(".exe"))
     {
-//        m_pTimer->stop();
-//        //QMessageBox::information(NULL, tr("错误"), tr("进程不存在!"), QMessageBox::Yes, QMessageBox::Yes);
-//        ui->m_labelTip->setText(tr("进程不存在!"));
         return -1;
     }
 
@@ -159,12 +156,16 @@ void CMonitorThread::run()
         }
 
         if (m_nPid <= 0)
+        {
+            QThread::msleep(10);
             continue;
+        }
 
         double fUsedMem = GetUsedMem(m_nPid, strExeName);
         if (fUsedMem < 0)
         {
             emit SignalProcState(false, 0, 0, strExeName);
+            QThread::msleep(10);
             continue;
         }
 
@@ -175,7 +176,7 @@ void CMonitorThread::run()
             emit SignalProcState(true, fUsedMem, nCpu, strExeName);
         }
 
-        QThread::msleep(100);
+        QThread::msleep(10);
     }
 }
 

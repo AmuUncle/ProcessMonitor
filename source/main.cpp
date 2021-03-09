@@ -8,27 +8,8 @@
 #include <QIcon>
 #include "appinit.h"
 
-//接收调试信息的函数
-void outputMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg)
-{
-    static QMutex mutex;
-    QMutexLocker lock(&mutex);
-
-    QString strCurrentTime = (QDateTime::currentDateTime()).toString("yyyy-MM-dd");
-
-    //将调试信息写入文件
-    QFile file(QString("%1.log").arg(strCurrentTime));
-    file.open(QIODevice::WriteOnly | QIODevice::Append);
-    QTextStream text_stream(&file);
-    text_stream << msg << "\r\n";
-    file.flush();
-    file.close();
-}
-
 int main(int argc, char *argv[])
 {
-    qInstallMessageHandler(outputMessage);
-
     QApplication a(argc, argv);
 
     AppInit::Instance()->start();  // 使整个窗口可以拖动

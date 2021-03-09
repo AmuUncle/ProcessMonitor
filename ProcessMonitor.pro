@@ -15,21 +15,30 @@ UI_DIR      += tmp
 
 win32:QMAKE_LFLAGS_WINDOWS += /LARGEADDRESSAWARE
 
-SOURCES += main.cpp\
-        processmonitor.cpp \
-    appinit.cpp \
-    monitorthread.cpp \
-    iconhelper.cpp
+INCLUDEPATH += include
 
-HEADERS  += processmonitor.h \
-    appinit.h \
-    monitorthread.h \
-    iconhelper.h
+SOURCES += source/main.cpp\
+        source/processmonitor.cpp \
+    source/appinit.cpp \
+    source/monitorthread.cpp \
+    source/iconhelper.cpp \
+    source/tipwidget.cpp \
+    source/basedlg.cpp \
+    source/aboutdlg.cpp
 
-FORMS    += processmonitor.ui
+HEADERS  += include/processmonitor.h \
+    include/appinit.h \
+    include/monitorthread.h \
+    include/iconhelper.h \
+    include/tipwidget.h \
+    include/aboutdlg.h \
+    include/basedlg.h
+
+FORMS    += form/processmonitor.ui \
+    form/aboutdlg.ui
 
 RESOURCES += \
-    processmonitor.qrc
+    res/processmonitor.qrc
 
 RC_FILE +=  \
-    processmonitor.rc
+    res/processmonitor.rc
