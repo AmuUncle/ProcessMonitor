@@ -11,8 +11,8 @@
 
 #### 软件截图
 
-![Image text](https://imgtu.com/i/63q20U)  
-![Image text](https://imgtu.com/i/63qslq)  
-![Image text](https://imgtu.com/i/63q6XV)  
-![Image text](https://imgtu.com/i/63qgmT)  
-![Image text](https://imgtu.com/i/63qy60)  
+![Image text](https://s3.ax1x.com/2021/03/09/63q20U.png)  
+![Image text](https://s3.ax1x.com/2021/03/09/63qslq.png)  
+![Image text](https://s3.ax1x.com/2021/03/09/63q6XV.png)  
+![Image text](https://s3.ax1x.com/2021/03/09/63qgmT.png)  
+![Image text](https://s3.ax1x.com/2021/03/09/63qy60.png)  
