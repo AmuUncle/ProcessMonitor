@@ -43,6 +43,7 @@ private slots:
     void OnCheckChartStateChanged(int nState);
     void OnCheckLogChanged(int nState);
     void OnMenuTriggered(QAction *action);
+    void OnStop();
 
 private:
     Ui::ProcessMonitor *ui;

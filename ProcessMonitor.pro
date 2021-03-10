@@ -24,7 +24,9 @@ SOURCES += source/main.cpp\
     source/iconhelper.cpp \
     source/tipwidget.cpp \
     source/basedlg.cpp \
-    source/aboutdlg.cpp
+    source/aboutdlg.cpp \
+    source/appkey.cpp \
+    source/gfxmessagebox.cpp
 
 HEADERS  += include/processmonitor.h \
     include/appinit.h \
@@ -32,7 +34,9 @@ HEADERS  += include/processmonitor.h \
     include/iconhelper.h \
     include/tipwidget.h \
     include/aboutdlg.h \
-    include/basedlg.h
+    include/basedlg.h \
+    include/appkey.h \
+    include/gfxmessagebox.h
 
 FORMS    += form/processmonitor.ui \
     form/aboutdlg.ui

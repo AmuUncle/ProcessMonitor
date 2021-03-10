@@ -30,6 +30,7 @@
 #include "iconhelper.h"
 #include "tipwidget.h"
 #include "aboutdlg.h"
+#include "appkey.h"
 
 #ifdef Q_OS_WIN32
 #include <tlhelp32.h>
@@ -179,6 +180,8 @@ void ProcessMonitor::InitCtrl()
 
     ui->m_editPid->setValidator(new QIntValidator(1, 65535));
     ui->m_editPid->setText(QString("%1").arg(GetCurrentProcessId()));
+
+    TTipWidget::Instance()->SetMesseage(tr("当前为试用版本，软件将在%1分钟后停止运行").arg(AppKey::Instance()->keyRunTimeOut()));  //提示信息
 }
 
 void ProcessMonitor::InitSolts()
@@ -189,6 +192,7 @@ void ProcessMonitor::InitSolts()
     connect(ui->m_checkChart, SIGNAL(stateChanged(int)), this, SLOT(OnCheckChartStateChanged(int)));
     connect(ui->m_checkLog, SIGNAL(stateChanged(int)), this, SLOT(OnCheckLogChanged(int)));
     connect(m_thread, SIGNAL(SignalProcState(bool, double, int, QString)), this, SLOT(OnProcState(bool, double, int, QString)));
+    connect(AppKey::Instance(), SIGNAL(SignalIsOver()), this, SLOT(OnStop()));
 }
 
 void ProcessMonitor::UpdateCtrlStatus()
@@ -436,4 +440,11 @@ void ProcessMonitor::OnMenuTriggered(QAction *action)
         }
         break;
     }
+}
+
+void ProcessMonitor::OnStop()
+{
+    m_bStart = false;
+    m_thread->Pause(true);
+    UpdateCtrlStatus();
 }

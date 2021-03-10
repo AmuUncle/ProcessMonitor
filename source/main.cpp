@@ -7,12 +7,15 @@
 #include <QDateTime>
 #include <QIcon>
 #include "appinit.h"
+#include "appkey.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
     AppInit::Instance()->start();  // 使整个窗口可以拖动
+    //启动密钥服务类
+    AppKey::Instance()->start();
 
     //加载样式表
     QFile file(":/qss/black.css");
