@@ -42,6 +42,8 @@
 #pragma execution_character_set("utf-8")
 #endif
 
+#define LOG_PATH QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)
+
 //接收调试信息的函数
 void outputMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -51,7 +53,7 @@ void outputMessage(QtMsgType type, const QMessageLogContext &context, const QStr
     QString strCurrentTime = (QDateTime::currentDateTime()).toString("yyyy-MM-dd");
 
     //将调试信息写入文件
-    QFile file(QString("%1.log").arg(strCurrentTime));
+    QFile file(QString("%1/%2.log").arg(LOG_PATH).arg(strCurrentTime));
     file.open(QIODevice::WriteOnly | QIODevice::Append);
     QTextStream text_stream(&file);
     text_stream << msg << "\r\n";
@@ -70,6 +72,8 @@ ProcessMonitor::ProcessMonitor(QWidget *parent) :
     m_thread = new CMonitorThread(this);
     m_thread->Pause(true);
     m_thread->start();
+
+    qDebug() << QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
 
     QChart *chart = new QChart();
     chart->setTitle("CPU(%)");
@@ -138,6 +142,9 @@ void ProcessMonitor::contextMenuEvent( QContextMenuEvent *event )
 
 void ProcessMonitor::InitCtrl()
 {
+    QDir dir;
+    dir.mkpath(LOG_PATH);
+
     setProperty("canMove", true);
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint | Qt::WindowMinMaxButtonsHint);
     ui->m_widgetMainToolBar->setProperty("form", "title");
@@ -398,7 +405,7 @@ void ProcessMonitor::OnCheckLogChanged(int nState)
     if (ui->m_checkLog->isChecked())
     {
         qInstallMessageHandler(outputMessage);
-        TTipWidget::Instance()->SetMesseage(tr("日志保存目录:%1").arg(qApp->applicationDirPath()));
+        TTipWidget::Instance()->SetMesseage(tr("日志保存目录:%1").arg(LOG_PATH));
 
 
     }
@@ -413,7 +420,7 @@ void ProcessMonitor::OnMenuTriggered(QAction *action)
     {
     case 0:
         {
-            QDesktopServices::openUrl(QUrl::fromLocalFile(qApp->applicationDirPath().replace("\\", "/")));
+            QDesktopServices::openUrl(QUrl::fromLocalFile(LOG_PATH.replace("\\", "/")));
         }
         break;
 
@@ -421,7 +428,7 @@ void ProcessMonitor::OnMenuTriggered(QAction *action)
         {
             QString fileName = QFileDialog::getSaveFileName(this,
                                 tr("保存文件"),
-                                "",
+                                "member_and_cpu.jpg",
                                 tr("图片文件(*.jpg)"));
 
             if (!fileName.isNull())

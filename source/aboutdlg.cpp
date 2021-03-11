@@ -2,6 +2,7 @@
 #include "ui_aboutdlg.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include "iconhelper.h"
 
 #if _MSC_VER >= 1600
 #pragma execution_character_set("utf-8")
@@ -27,7 +28,8 @@ CAboutDlg::~CAboutDlg()
 void CAboutDlg::InitCtrl()
 {
     SetTitle(tr("关于"));
-    ui->m_labelIcon->setStyleSheet("border-image: url(:/image/Monitor.ico);");
+    //ui->m_labelIcon->setStyleSheet("border-image: url(:/image/Monitor.ico);");
+    IconHelper::Instance()->setIcon(ui->m_labelIcon, QChar(0xf2d6), 50);
     ui->m_labelIcon->setFixedSize(64, 64);
     ui->m_labelNote->setText(QString("ProcessMonitor v1.0\n%1 hudejie2018@163.com")
                              .arg(tr("版权所有©1995-2021 阿木大叔")));
